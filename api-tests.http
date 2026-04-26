@@ -1,0 +1,207 @@
+### ==========================================
+### CACAU SHOW API - TESTES
+### ==========================================
+
+### Configuração
+@baseUrl = http://localhost:5000
+@contentType = application/json
+
+### ==========================================
+### 1. CRIAR PRODUTOS
+### ==========================================
+
+### Produto Normal
+POST {{baseUrl}}/api/producao/produto
+Content-Type: {{contentType}}
+
+{
+  "nome": "Chocolate ao Leite",
+  "tipo": "Normal",
+  "precoBase": 25.50
+}
+
+### Produto Sazonal (Ovos de Páscoa)
+POST {{baseUrl}}/api/producao/produto
+Content-Type: {{contentType}}
+
+{
+  "nome": "Ovo de Páscoa",
+  "tipo": "Sazonal",
+  "precoBase": 45.00
+}
+
+### Produto Sazonal (Natal)
+POST {{baseUrl}}/api/producao/produto
+Content-Type: {{contentType}}
+
+{
+  "nome": "Cesta de Natal",
+  "tipo": "Sazonal",
+  "precoBase": 120.00
+}
+
+### Listar Produtos
+GET {{baseUrl}}/api/producao/produto
+
+### ==========================================
+### 2. CRIAR FRANQUIAS
+### ==========================================
+
+### Franquia 1
+POST {{baseUrl}}/api/franquia
+Content-Type: {{contentType}}
+
+{
+  "nomeLoja": "Cacau Show - Loja Centro",
+  "cidade": "São Paulo",
+  "capacidadeDeEstoque": 100
+}
+
+### Franquia 2
+POST {{baseUrl}}/api/franquia
+Content-Type: {{contentType}}
+
+{
+  "nomeLoja": "Cacau Show - Shopping",
+  "cidade": "Rio de Janeiro",
+  "capacidadeDeEstoque": 50
+}
+
+### Listar Franquias
+GET {{baseUrl}}/api/franquia
+
+### ==========================================
+### 3. CRIAR LOTES DE PRODUÇÃO (A)
+### ==========================================
+
+### Lote válido
+POST {{baseUrl}}/api/loteprodução/criar
+Content-Type: {{contentType}}
+
+{
+  "codigoLote": "LT001",
+  "datafabricacao": "2025-04-15T10:00:00",
+  "produtoId": 1,
+  "status": "Qualidade Pendente"
+}
+
+### ❌ Erro: Data futura
+POST {{baseUrl}}/api/loteprodução/criar
+Content-Type: {{contentType}}
+
+{
+  "codigoLote": "LT002",
+  "datafabricacao": "2026-12-25T10:00:00",
+  "produtoId": 1,
+  "status": "Qualidade Pendente"
+}
+
+### ❌ Erro: Produto não existe
+POST {{baseUrl}}/api/loteprodução/criar
+Content-Type: {{contentType}}
+
+{
+  "codigoLote": "LT003",
+  "datafabricacao": "2025-04-15T10:00:00",
+  "produtoId": 999,
+  "status": "Qualidade Pendente"
+}
+
+### Listar Lotes
+GET {{baseUrl}}/api/loteprodução
+
+### Obter Lote específico
+GET {{baseUrl}}/api/loteprodução/1
+
+### ==========================================
+### 4. ATUALIZAR STATUS DO LOTE (C)
+### ==========================================
+
+### Atualizar para Aprovado
+PATCH {{baseUrl}}/api/loteprodução/1/status
+Content-Type: {{contentType}}
+
+{
+  "novoStatus": "Qualidade Aprovada"
+}
+
+### Atualizar para Descartado
+PATCH {{baseUrl}}/api/loteprodução/1/status
+Content-Type: {{contentType}}
+
+{
+  "novoStatus": "Descartado"
+}
+
+### ❌ Erro: Tentar alterar lote descartado para Aprovado
+PATCH {{baseUrl}}/api/loteprodução/1/status
+Content-Type: {{contentType}}
+
+{
+  "novoStatus": "Qualidade Aprovada"
+}
+
+### ==========================================
+### 5. CRIAR PEDIDOS (B)
+### ==========================================
+
+### Pedido normal (sem embalagem especial)
+POST {{baseUrl}}/api/pedido/criar
+Content-Type: {{contentType}}
+
+{
+  "unidadeId": 1,
+  "produtoId": 1,
+  "quantidade": 10,
+  "valorTotal": 0
+}
+
+### Pedido sazonal (com embalagem especial de R$ 15,00)
+POST {{baseUrl}}/api/pedido/criar
+Content-Type: {{contentType}}
+
+{
+  "unidadeId": 1,
+  "produtoId": 2,
+  "quantidade": 5,
+  "valorTotal": 0
+}
+
+### ❌ Erro: Exceder capacidade de estoque (capacidade=100, já existe 15 itens)
+POST {{baseUrl}}/api/pedido/criar
+Content-Type: {{contentType}}
+
+{
+  "unidadeId": 1,
+  "produtoId": 1,
+  "quantidade": 90,
+  "valorTotal": 0
+}
+
+### Pedido em franquia pequena
+POST {{baseUrl}}/api/pedido/criar
+Content-Type: {{contentType}}
+
+{
+  "unidadeId": 2,
+  "produtoId": 2,
+  "quantidade": 45,
+  "valorTotal": 0
+}
+
+### ❌ Erro: Exceder capacidade franquia 2 (capacidade=50, já existe 45)
+POST {{baseUrl}}/api/pedido/criar
+Content-Type: {{contentType}}
+
+{
+  "unidadeId": 2,
+  "produtoId": 1,
+  "quantidade": 10,
+  "valorTotal": 0
+}
+
+### Listar Pedidos
+GET {{baseUrl}}/api/pedido
+
+### Obter Pedido específico
+GET {{baseUrl}}/api/pedido/1
